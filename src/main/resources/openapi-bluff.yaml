@@ -5,6 +5,52 @@ info:
   description: Contains API specs for Card Games
 paths:
   # Users APIs
+  /api/v1/users/{userId}:
+    get:
+      description: Get user
+      summary: Get user
+      operationId: getUser
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          description: userId of customer
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/GetPlayerResponse'
+        '400':
+          description: 'Invalid request'
+  /api/v1/users:
+    post:
+      description: Create user
+      summary: Create user
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/CreatePlayerRequest"
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/CreatePlayerResponse'
+        '400':
+          description: 'Invalid request'
   /api/v1/users/{userId}/games/{gameId}:
     get:
       description: Get Game details of the user
@@ -35,8 +81,105 @@ paths:
                 $ref: '#/components/schemas/Game'
         '400':
           description: 'Invalid request'
-
-
+  /api/v1/games:
+    post:
+      description: Create new Game
+      summary: Create new Game
+      operationId: newGame
+      tags:
+        - Games
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/CreateGameRequest"
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: 'Invalid request'
+  /api/v1/games/{gameId}/actions/{command}:
+    post:
+      description: Perform actions on the game
+      summary: Perform actions on the game
+      operationId: gameActions
+      tags:
+        - Games
+      parameters:
+        - name: gameId
+          in: path
+          description: Game Id
+          required: true
+          schema:
+            type: string
+        - name: command
+          in: path
+          description: Action command
+          required: true
+          schema:
+            $ref: "#/components/schemas/GameAction"
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/GameActionRequest"
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/GameActionResponse'
+        '400':
+          description: 'Invalid request'
+  /api/v1/users/{userId}/games/{gameId}/cards/actions/{command}:
+    post:
+      description: Perform actions on the cards of a game
+      summary: Perform actions on the cards of a game
+      operationId: cardActions
+      tags:
+        - Games
+      parameters:
+        - name: userId
+          in: path
+          description: userId of customer
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: gameId
+          in: path
+          description: Game Id
+          required: true
+          schema:
+            type: string
+        - name: command
+          in: path
+          description: Action command
+          required: true
+          schema:
+            $ref: "#/components/schemas/CardAction"
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/GameActionRequest"
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: 'Invalid request'
 
 tags:
   - name: Admin
@@ -47,6 +190,18 @@ servers:
   - url: "http://nc-fintech-lsp-v2.loans.svc.cluster.local/lsp"
 components:
   schemas:
+    GameAction:
+      type: string
+      enum: &GameActionOperation
+        - onboardplayer
+        - start
+        - distribute
+      x-enum-varnames: *GameActionOperation
+    CardAction:
+      type: string
+      enum:
+        - dispose
+        - pick
     Metadata:
       type: object
       properties:
@@ -68,6 +223,8 @@ components:
           type: string
     Game:
       properties:
+        id:
+          type: string
         players:
           type: array
           items:
@@ -90,9 +247,100 @@ components:
           type: string
         name:
           type: string
+        mobile:
+          type: string
         avatar:
-          $ref: "#/components/schemas/Avatar"
+          type: string
+#          $ref: "#/components/schemas/Avatar"
     Avatar:
       properties:
         id:
           type: string
+    Card:
+      properties:
+        symbol:
+          enum:
+            - HEARTS
+            - SPADES
+            - CLUBS
+            - DIAMONDS
+        character:
+          enum:
+            - KING
+            - QUEEN
+            - JACK
+            - TEN
+            - NINE
+            - EIGHT
+            - SEVEN
+            - SIX
+            - FIVE
+            - FOUR
+            - THREE
+            - TWO
+            - ACE
+            - JOKER
+        colour:
+          enum:
+            - BLACK
+            - RED
+    GameActionRequest:
+      required:
+        - command
+      properties:
+        command:
+          $ref: '#/components/schemas/GameAction'
+      discriminator:
+        propertyName: command
+        mapping:
+          onboardplayer: "#/components/schemas/OnboardPlayerRequest"
+          start: "#/components/schemas/StartGameRequest"
+          distribute: "#/components/schemas/DistributeRequest"
+    DistributeRequest:
+      allOf:
+        - $ref: "#/components/schemas/GameActionRequest"
+    CreateGameRequest:
+      type: object
+      properties:
+        decks:
+          type: integer
+    CreateGameResponse:
+      allOf:
+        - $ref: "#/components/schemas/Metadata"
+        - $ref: "#/components/schemas/Game"
+    GetPlayerResponse:
+      allOf:
+        - $ref: "#/components/schemas/Metadata"
+      properties:
+        data:
+          $ref: "#/components/schemas/Player"
+    CreatePlayerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        avatar:
+          type: string
+    CreatePlayerResponse:
+      allOf:
+        - $ref: "#/components/schemas/Metadata"
+      properties:
+        data:
+          $ref: "#/components/schemas/Player"
+    OnboardPlayerRequest:
+      allOf:
+        - $ref: "#/components/schemas/GameActionRequest"
+        - type: object
+          properties:
+            playerId:
+              type: integer
+    GameActionResponse:
+      type: object
+      properties:
+        game:
+          $ref: "#/components/schemas/Game"
+    StartGameRequest:
+      allOf:
+        - $ref: "#/components/schemas/GameActionRequest"
