@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Card Games Service
+  description: Contains API specs for Card Games
+paths:
+  # Users APIs
+  /api/v1/users/{userId}/games/{gameId}:
+    get:
+      description: Get Game details of the user
+      summary: Get Game details of the user
+      operationId: getUserGameInfo
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          description: userId of customer
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: gameId
+          in: path
+          description: Game Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: 'Invalid request'
+
+
+
+tags:
+  - name: Admin
+  - name: Games
+  - name: Users
+
+servers:
+  - url: "http://nc-fintech-lsp-v2.loans.svc.cluster.local/lsp"
+components:
+  schemas:
+    Metadata:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        errorCategory:
+          type: string
+        timestamp:
+          type: string
+        message:
+          type: string
+    Game:
+      properties:
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+        totalDecks:
+          type: integer
+        status:
+          enum:
+            - INIT
+            - IN_PROGRESS
+            - END
+            - ABANDONED
+        winner:
+          $ref: '#/components/schemas/Player'
+        nextPlayer:
+          $ref: '#/components/schemas/Player'
+    Player:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        avatar:
+          $ref: "#/components/schemas/Avatar"
+    Avatar:
+      properties:
+        id:
+          type: string
