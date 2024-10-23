@@ -81,6 +81,43 @@ paths:
                 $ref: '#/components/schemas/Game'
         '400':
           description: 'Invalid request'
+  /api/v1/users/{userId}/actions/{command}:
+    post:
+      description: Perform actions for the user
+      summary: Perform actions for the user
+      operationId: userActions
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          description: userId of customer
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: command
+          in: path
+          description: Action command
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserAction"
+      requestBody:
+        content:
+          application/json;charset=utf-8:
+            schema:
+              $ref: "#/components/schemas/UserActionRequest"
+        required: true
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/UserActionResponse'
+        '400':
+          description: 'Invalid request'
+  # Game APIs
   /api/v1/games:
     post:
       description: Create new Game
@@ -180,20 +217,65 @@ paths:
                 $ref: '#/components/schemas/Game'
         '400':
           description: 'Invalid request'
-
+  # Room APIs
+  /api/v1/rooms:
+    post:
+      description: Create Room
+      summary: Create Room
+      operationId: createRoom
+      tags:
+        - Rooms
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/CreateRoomResponse"
+        '400':
+          description: 'Invalid request'
+  /api/v1/rooms/{roomId}:
+    get:
+      description: Get Room
+      summary: Get Room
+      operationId: getRoom
+      tags:
+        - Rooms
+      parameters:
+        - name: roomId
+          in: path
+          description: roomId of the pre-game
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/CreateRoomResponse"
+        '400':
+          description: 'Invalid request'
 tags:
   - name: Admin
   - name: Games
   - name: Users
+  - name: Rooms
 
 servers:
   - url: "http://nc-fintech-lsp-v2.loans.svc.cluster.local/lsp"
 components:
   schemas:
+    UserAction:
+      type: string
+      enum: &UserActionOperation
+        - joinroom
+        - exitroom
+      x-enum-varnames: *UserActionOperation
     GameAction:
       type: string
       enum: &GameActionOperation
-        - onboardplayer
         - start
         - distribute
       x-enum-varnames: *GameActionOperation
@@ -251,7 +333,11 @@ components:
           type: string
         avatar:
           type: string
-#          $ref: "#/components/schemas/Avatar"
+        #          $ref: "#/components/schemas/Avatar"
+        cards:
+          type: array
+          items:
+            type: string
     Avatar:
       properties:
         id:
@@ -293,7 +379,6 @@ components:
       discriminator:
         propertyName: command
         mapping:
-          onboardplayer: "#/components/schemas/OnboardPlayerRequest"
           start: "#/components/schemas/StartGameRequest"
           distribute: "#/components/schemas/DistributeRequest"
     DistributeRequest:
@@ -339,8 +424,60 @@ components:
     GameActionResponse:
       type: object
       properties:
-        game:
-          $ref: "#/components/schemas/Game"
+        data:
+          type: object
     StartGameRequest:
       allOf:
         - $ref: "#/components/schemas/GameActionRequest"
+      properties:
+        roomId:
+          type: string
+    UserActionRequest:
+      required:
+        - command
+      properties:
+        command:
+          $ref: '#/components/schemas/UserAction'
+      discriminator:
+        propertyName: command
+        mapping:
+          joinroom: "#/components/schemas/JoinRoomRequest"
+          exitroom: "#/components/schemas/ExitRoomRequest"
+    JoinRoomRequest:
+      allOf:
+        - $ref: "#/components/schemas/UserActionRequest"
+      properties:
+        roomId:
+          type: string
+    ExitRoomRequest:
+      allOf:
+        - $ref: "#/components/schemas/UserActionRequest"
+      properties:
+        roomId:
+          type: string
+    CreateRoomResponse:
+      allOf:
+        - $ref: "#/components/schemas/Metadata"
+      properties:
+        data:
+          $ref: "#/components/schemas/Room"
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+    UserActionResponse:
+      allOf:
+        - $ref: "#/components/schemas/Metadata"
+      properties:
+        data:
+          type: object

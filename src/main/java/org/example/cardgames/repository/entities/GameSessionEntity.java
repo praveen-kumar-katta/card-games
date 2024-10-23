@@ -1,5 +1,6 @@
 package org.example.cardgames.repository.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.Objects;
@@ -8,17 +9,22 @@ import org.hibernate.annotations.Where;
 
 @Data
 @Entity
-@Table(name = "players")
+@Table(name = "game_sessions")
 @Where(clause = "deleted=0")
-public class PlayerEntity extends BaseModel {
+public class GameSessionEntity extends BaseModel {
 
-  private String name;
-  private String mobile;
-  private String avatar;
+  @Column(name = "game_id")
+  private String gameId;
+
+  @Column(name = "player_id")
+  private Long playerId;
+
+  @Column(name = "player_cards")
+  private String playerCards;
 
   @Override
   public boolean isNew() {
-    return Objects.isNull(getId());
+    return Objects.isNull(this.getId());
   }
 
   @Override

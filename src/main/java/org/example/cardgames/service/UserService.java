@@ -8,4 +8,9 @@ public interface UserService {
   Player createPlayer(CreatePlayerRequest request);
 
   Player getPlayer(Long id);
+
+  boolean joinRoom(String roomId, Long playerId);
+
+  boolean exitRoom(String roomId, Long playerId);
+
 }

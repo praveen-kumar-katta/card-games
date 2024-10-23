@@ -1,5 +1,6 @@
 package org.example.cardgames.repository.mappers;
 
+import java.util.Optional;
 import org.example.cardgames.model.CreatePlayerRequest;
 import org.example.cardgames.repository.entities.PlayerEntity;
 import org.example.cardgames.service.models.Player;
@@ -14,7 +15,11 @@ public interface PlayerEntityMapper {
 
   @Mapping(target = "createdBy", constant = "1")
   @Mapping(target = "updatedBy", constant = "1")
-  PlayerEntity toEntity(CreatePlayerRequest request);
+  PlayerEntity fromService(CreatePlayerRequest request);
 
-  Player fromEntity(PlayerEntity playerEntity);
+  Player toService(PlayerEntity playerEntity);
+
+  default Optional<Player> toService(Optional<PlayerEntity> playerEntityOpt) {
+    return playerEntityOpt.map(this::toService);
+  }
 }
