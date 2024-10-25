@@ -16,4 +16,5 @@ public class Pool {
   private Player lastBidBy;
   private Player firstBidBy;
   private BluffGame game;
+  private List<GameSession> playerCards;
 }

@@ -11,7 +11,6 @@ import org.example.cardgames.repository.PlayerRepository;
 import org.example.cardgames.repository.RoomPlayersRepository;
 import org.example.cardgames.repository.entities.RoomPlayersEntity;
 import org.example.cardgames.repository.mappers.PlayerEntityMapper;
-import org.example.cardgames.repository.mappers.RoomEntityMapper;
 import org.example.cardgames.repository.mappers.RoomPlayersEntityMapper;
 import org.example.cardgames.repository.stores.RoomStore;
 import org.example.cardgames.service.UserService;
@@ -79,8 +78,7 @@ public class UserServiceImpl implements UserService {
   }
 
   private Optional<Room> getRoom(String roomId) {
-    Optional<Room> roomOptional = RoomEntityMapper.INSTANCE.toService(
-        roomStore.findByRoomId(roomId));
+    Optional<Room> roomOptional = roomStore.findByRoomId(roomId);
     if (roomOptional.isEmpty()) {
       log.error("Room not found to add new player. RoomId: {}", roomId);
       throw new RuntimeException("Room not found!");

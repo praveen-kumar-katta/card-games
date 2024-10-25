@@ -49,4 +49,9 @@ public class SuiteUtils {
   public static List<String> getSuite(String cover) {
     return getSuite().parallelStream().map(card -> cover.concat("_").concat(card)).toList();
   }
+
+  public static List<String> getSuitesForNDecks(int decks) {
+    return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().limit(decks).mapToObj(c -> String.valueOf((char) c))
+        .flatMap(cover -> getSuite(cover).stream()).collect(Collectors.toList());
+  }
 }

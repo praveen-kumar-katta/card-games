@@ -20,8 +20,8 @@ public class RoomStoreImpl implements RoomStore {
   private final RoomRepository roomRepository;
 
   @Override
-  public Optional<RoomEntity> findByRoomId(String roomId) {
-    return roomRepository.findByRoomId(roomId);
+  public Optional<Room> findByRoomId(String roomId) {
+    return RoomEntityMapper.INSTANCE.toService(roomRepository.findByRoomId(roomId));
   }
 
   @Override

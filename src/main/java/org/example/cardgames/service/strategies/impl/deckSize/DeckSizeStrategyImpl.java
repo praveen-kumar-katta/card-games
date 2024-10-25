@@ -1,4 +1,4 @@
-package org.example.cardgames.service.strategies.impl;
+package org.example.cardgames.service.strategies.impl.deckSize;
 
 import org.example.cardgames.service.strategies.DeckSizeStrategy;
 import org.springframework.stereotype.Service;
